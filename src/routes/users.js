@@ -11,7 +11,45 @@ require('dotenv/config');
 
 const router = express.Router();
 
-
+/**
+ * @swagger
+ * /api/users/register:
+ *   post:
+ *     summary: Register a new user
+ *     description: Registers a new user by providing a name, email, and password. The email must be unique.
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The name of the user
+ *                 example: "john_doe"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address of the user (must be unique)
+ *                 example: "john.doe@example.com"
+ *               password:
+ *                 type: string
+ *                 description: The password for the user
+ *                 example: "securePassword123"
+ *             required:
+ *               - email
+ *               - password
+ *     responses:
+ *       201:
+ *         description: Successfully registered the user
+ *       400:
+ *         description: Email already exists or invalid request body
+ *       500:
+ *         description: Internal Server Error
+ */
 router.post('/register', validateBody(registerUserDTO), async (req, res, next) => {
     try {
         const existingUser = await User.findOne({ email: req.body.email });
@@ -22,7 +60,7 @@ router.post('/register', validateBody(registerUserDTO), async (req, res, next) =
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
         const newUser = new User({
-            username: req.body.username,
+            name: req.body.name,
             email: req.body.email,
             password: hashedPassword
         });
@@ -35,7 +73,50 @@ router.post('/register', validateBody(registerUserDTO), async (req, res, next) =
     }
 });
 
-
+/**
+ * @swagger
+ * /api/users/login:
+ *   post:
+ *     summary: Login a user
+ *     description: Authenticates a user by verifying their email and password. If valid, returns a JWT token.
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address of the user
+ *                 example: "john.doe@example.com"
+ *               password:
+ *                 type: string
+ *                 description: The password of the user
+ *                 example: "securePassword123"
+ *             required:
+ *               - email
+ *               - password
+ *     responses:
+ *       200:
+ *         description: Successfully logged in and returned a JWT token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: The JWT token used for authenticated requests
+ *                   example: "your-jwt-token-here"
+ *       401:
+ *         description: Invalid credentials (email or password mismatch)
+ *       500:
+ *         description: Internal Server Error
+ */
 router.post('/login', validateBody(loginUserDTO), async (req, res, next) => {
     try {
         const user = await User.findOne({ email: req.body.email });
