@@ -4,6 +4,7 @@ require('dotenv/config');
 
 const machinesRoute = require('./routes/machines.js');
 const usersRoute = require('./routes/users.js');
+const repairTypesRoute = require('./routes/repair-types.js');
 
 const apiErrorHandler = require('./error/api-error-handler');
 
@@ -13,6 +14,7 @@ const PORT = process.env.PORT;
 app.use(express.json());
 app.use('/api/machines', machinesRoute);
 app.use('/api/users', usersRoute);
+app.use('/api/repair-types', repairTypesRoute);
 app.use(apiErrorHandler);
 
 mongoose
