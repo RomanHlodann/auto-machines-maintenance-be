@@ -3,34 +3,37 @@ const router = express.Router();
 
 const Machine = require('../models/Machine');
 const validateBody = require('../middlewares/validate-dto');
+const verifyToken = require('../middlewares/verify-token');
+const isObjectRelatedToUser = require('../middlewares/is-object-related-to-user');
 const { createMachineDTO, updateMachineDTO } = require('../dto/machine');
 
 
-router.get('/', async(req, res) => {
-    const machines = await Machine.find({});
-    res.send(machines);
+router.get('/', verifyToken, async(req, res) => {
+    try {
+        const machines = await Machine.find({user: req.user._id});
+        res.send(machines);
+    } catch (err) {
+        console.log(err);
+    }
 })
 
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', verifyToken, isObjectRelatedToUser(Machine), async (req, res, next) => {
     try {
-        const machine = await Machine.findById(req.params.id);
-        if (!machine) {
-            return res.status(404).send({'message': 'Machine not found'});
-        }
-        res.send(machine);
+        res.send(req.neededObject);
     } catch (err) {
         next(err);
     }
 });
 
 
-router.post('/', validateBody(createMachineDTO), async (req, res, next) => {
+router.post('/', verifyToken, validateBody(createMachineDTO), async (req, res, next) => {
     try {
         const machine = new Machine({
             country: req.body.country,
             productionYear: req.body.productionYear,
-            brand: req.body.brand
+            brand: req.body.brand,
+            user: req.user._id
         });
     
         const newMachine = await machine.save();
@@ -41,17 +44,17 @@ router.post('/', validateBody(createMachineDTO), async (req, res, next) => {
 });
 
 
-router.patch('/:id', validateBody(updateMachineDTO), async (req, res, next) => {
+router.patch('/:id', verifyToken, validateBody(updateMachineDTO), isObjectRelatedToUser(Machine), async (req, res, next) => {
     try {
-        const machine = await Machine.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.send(machine);
+        const updatedMachine = await Machine.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.send(updatedMachine);
     } catch (err) {
         next(err);
     }
 });
 
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', verifyToken, isObjectRelatedToUser(Machine), async (req, res, next) => {
     try {
         await Machine.findByIdAndDelete(req.params.id);
         res.status(204).send('Machine deleted');
