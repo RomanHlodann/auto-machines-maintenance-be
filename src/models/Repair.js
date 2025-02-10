@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 
-const RepairTypeSchema = new mongoose.Schema({
+const RepairSchema = new mongoose.Schema({
     machine: { type: mongoose.Schema.Types.ObjectId, ref: 'Machine', required: true },
     repairType: { type: mongoose.Schema.Types.ObjectId, ref: 'RepairType', required: true },
     beginDate: { type: Date, default: Date.now },
@@ -10,7 +10,7 @@ const RepairTypeSchema = new mongoose.Schema({
 });
 
 
-RepairTypeSchema.index({ name: 1, userId: 1 }, { unique: true });
+RepairSchema.index({ name: 1, userId: 1 }, { unique: true });
 
 
-module.exports = mongoose.model('RepairType', RepairTypeSchema);
+module.exports = mongoose.model('Repair', RepairSchema);
