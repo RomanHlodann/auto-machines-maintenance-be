@@ -10,7 +10,7 @@ const RepairSchema = new mongoose.Schema({
 });
 
 
-// RepairSchema.index({ machine: 1, repairType: 1, beginDate: 1, notes: 1, userId: 1 }, { unique: true });
+RepairSchema.index({ machine: 1, repairType: 1, beginDate: 1, notes: 1, userId: 1 }, { unique: true });
 
 
 module.exports = mongoose.model('Repair', RepairSchema);
